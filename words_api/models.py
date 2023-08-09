@@ -3,6 +3,7 @@ from django.db import models
 
 class Word(models.Model):
     word = models.CharField(max_length=30, unique=True, primary_key=True)
+    length = models.IntegerField(default=0)
     frequency = models.IntegerField(default=0)
     type = models.CharField(max_length=10, default=None)
     language = models.CharField(max_length=2, default='en')

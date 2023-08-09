@@ -18,9 +18,6 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path('add_all', views.add_all_words),
-    path('mark_unique', views.mark_unique),
-    path('get_word_info/<str:word>', views.get_word_info),
+    path('is_a_word/<str:word>', views.is_a_word),
     path('random', views.get_random_word),
-
 ]

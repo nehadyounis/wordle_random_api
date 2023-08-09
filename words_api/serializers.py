@@ -2,10 +2,16 @@ from rest_framework import serializers
 from .models import *
 
 
+class MiniWordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Word
+        fields = ['word']
+
+
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
-        fields = ['word', 'language', 'frequency', 'is_common']
+        fields = ['word', 'length', 'type', 'is_common']
 
 class StatSerializer(serializers.ModelSerializer):
     class Meta:
