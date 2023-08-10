@@ -1,11 +1,11 @@
 # Wordle Random Api
  A random word generator API for wordle-like games
 
-#Introduction:
+# Introduction:
 Wordle Random Api is an api that is able to generate a random word or a set of random words according to your criteria. Currently supported language is English.
 The api uses a dataset of more than **350,000** English words, of which **3000** words were marked as common words for daily use.
 
-###Usage
+### Usage
 The app can be used to generate random words or to verify if a given word is an english word.
 
 Use cases:
@@ -15,7 +15,7 @@ Use cases:
 
 and more.
 
-##Generating random words.
+## Generating random words.
 To generate a random word, make a `GET` request to the following endpoint:
 
 `http://127.0.0.1:8000/v1/random`
