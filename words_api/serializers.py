@@ -7,11 +7,10 @@ class MiniWordSerializer(serializers.ModelSerializer):
         model = Word
         fields = ['word']
 
-
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
-        fields = ['word', 'length', 'type', 'is_common']
+        fields = ['word', 'length', 'type', 'is_common', 'frequency']
 
 class StatSerializer(serializers.ModelSerializer):
     class Meta:

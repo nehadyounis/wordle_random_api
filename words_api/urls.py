@@ -20,4 +20,5 @@ from . import views
 urlpatterns = [
     path('is_a_word/<str:word>', views.is_a_word),
     path('random', views.get_random_word),
+    #path('set_freq', views.set_freq),
 ]

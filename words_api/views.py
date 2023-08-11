@@ -6,6 +6,7 @@ from .serializers import *
 import csv
 from django.conf import settings
 import re
+import time
 
 
 # @api_view(['GET'])
@@ -68,7 +69,28 @@ import re
 #     return JsonResponse(response, safe=False)
 
 @api_view(['GET'])
+def set_freq(request):
+    """
+    :param request:
+    :return: Number of words altered in a JsonResponse
+    This function marks unique words in the database according to external CSV.
+    """
+    # return bad_request('Cannot modify the database currently')
+    file = open(str(settings.BASE_DIR) + "/static/" + 'frequencies.csv')
+    csvreader = csv.reader(file)
+    response = 0
+    for row in csvreader:
+        try:
+            Word.objects.filter(word=row[0]).update(frequency=int(row[1]))
+            response = response + 1
+        except:
+            pass
+    return JsonResponse(response, safe=False)
+
+
+@api_view(['GET'])
 def get_random_word(request):
+
     try:
         show_info = int(request.GET.get('show_info', 0))
 
@@ -97,7 +119,8 @@ def get_random_word(request):
     if amount > 25:
         bad_request("amount beyond limit.")
 
-    if (reg is not None) and (length or max_length or min_length or contains_none or contains_only or contains_all or contains_any or pattern):
+    if (reg is not None) and (
+            length or max_length or min_length or contains_none or contains_only or contains_all or contains_any or pattern):
         bad_request("no parameters can be used while using regex.")
 
     if length and (max_length or min_length):
@@ -133,77 +156,78 @@ def get_random_word(request):
             ser = WordSerializer(random, many=True)
         else:
             ser = MiniWordSerializer(random, many=True)
-        return JsonResponse(ser.data, safe=False)
-
-    if length:
-        lenQ = Q(length=length)
-    elif min_length and max_length:
-        lenQ = Q(length__range=(min_length, max_length))
-    elif min_length:
-        lenQ = Q(length__gte=min_length)
-    elif max_length:
-        lenQ = Q(length__lte=max_length)
     else:
-        lenQ = Q()
+        if length:
+            lenQ = Q(length=length)
+        elif min_length and max_length:
+            lenQ = Q(length__range=(min_length, max_length))
+        elif min_length:
+            lenQ = Q(length__gte=min_length)
+        elif max_length:
+            lenQ = Q(length__lte=max_length)
+        else:
+            lenQ = Q()
 
-    if contains_any:
-        checker = check_parameter_string(contains_any)
-        if checker:
-            return checker
-        contains_anyQ = Q(word__regex='[' + str(contains_any) + ']')
-    else:
-        contains_anyQ = Q()
+        if contains_any:
+            checker = check_parameter_string(contains_any)
+            if checker:
+                return checker
+            contains_anyQ = Q(word__regex='[' + str(contains_any) + ']')
+        else:
+            contains_anyQ = Q()
 
-    if contains_all:
-        checker = check_parameter_string(contains_all)
-        if checker:
-            return checker
-        regex = ''
-        for letter in contains_all:  # (?=.*[a-z])
-            regex += '(?=.*' + letter + ')'
-        contains_allQ = Q(word__regex='' + str(regex) + '.*')
-    else:
-        contains_allQ = Q()
+        if contains_all:
+            checker = check_parameter_string(contains_all)
+            if checker:
+                return checker
+            regex = ''
+            for letter in contains_all:  # (?=.*[a-z])
+                regex += '(?=.*' + letter + ')'
+            contains_allQ = Q(word__regex='' + str(regex) + '.*')
+        else:
+            contains_allQ = Q()
 
-    if contains_only:
-        checker = check_parameter_string(contains_only)
-        if checker:
-            return checker
-        regex = '^[' + str(contains_only) + ']+$'
-        contains_onlyQ = Q(word__regex = regex)
-    else:
-        contains_onlyQ = Q()
+        if contains_only:
+            checker = check_parameter_string(contains_only)
+            if checker:
+                return checker
+            regex = '^[' + str(contains_only) + ']+$'
+            contains_onlyQ = Q(word__regex=regex)
+        else:
+            contains_onlyQ = Q()
 
-    if contains_none:
-        checker = check_parameter_string(contains_none)
-        if checker:
-            return checker
-        regex = '^[^' + str(contains_none) + ']+$'
-        contains_noneQ = Q(word__regex = regex)
-    else:
-        contains_noneQ = Q()
+        if contains_none:
+            checker = check_parameter_string(contains_none)
+            if checker:
+                return checker
+            regex = '^[^' + str(contains_none) + ']+$'
+            contains_noneQ = Q(word__regex=regex)
+        else:
+            contains_noneQ = Q()
 
-    if pattern:
-        checker = check_parameter_string(pattern)
-        if checker:
-            return checker
-        regex = ''
-        for letter in pattern: #(?=.*[a-z])
-            if letter == '*':
-                regex += '[a-z]{1}'
-            else:
-                regex += '(' + letter +'){1}'
-        patternQ = Q(word__regex = '^'+str(regex) +'$')
-    else:
-        patternQ = Q()
+        if pattern:
+            checker = check_parameter_string(pattern)
+            if checker:
+                return checker
+            regex = ''
+            for letter in pattern:  # (?=.*[a-z])
+                if letter == '*':
+                    regex += '[a-z]{1}'
+                else:
+                    regex += '(' + letter + '){1}'
+            patternQ = Q(word__regex='^' + str(regex) + '$')
+        else:
+            patternQ = Q()
 
-    random = Word.objects.filter(commonQ & typeQ & lenQ & contains_anyQ & contains_allQ &
-                                 contains_onlyQ & contains_noneQ & patternQ).order_by('?')[0:amount]
-    if show_info:
-        ser = WordSerializer(random, many=True)
-    else:
-        ser = MiniWordSerializer(random, many=True)
+        random = Word.objects.filter(commonQ & typeQ & lenQ & contains_anyQ & contains_allQ &
+                                     contains_onlyQ & contains_noneQ & patternQ).order_by('?')[0:amount]
+        if show_info:
+            ser = WordSerializer(random, many=True)
+        else:
+            ser = MiniWordSerializer(random, many=True)
+
     return JsonResponse(ser.data, safe=False)
+
 
 @api_view(['GET'])
 def is_a_word(request, word):
@@ -235,9 +259,25 @@ def bad_request(msg):
     resp.status_code = 400
     return resp
 
+
+def rate_exceeded(msg):
+    resp = JsonResponse({"error": msg}, safe=False)
+    resp.status_code = 429
+    return resp
+
+
 def check_parameter_string(string):
     pattern = re.compile("^[a-z*]+$")
     if not pattern.match(str(string)):
         return bad_request("One or more parameters contains bad characters")
     else:
         return None
+
+
+def get_ip_address(request):
+    user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
+    if user_ip_address:
+        ip = user_ip_address.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip

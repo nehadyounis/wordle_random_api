@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: db
+    networks:
+      - djangonetwork
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./words_db.sql:/words_db.sql
+    env_file:
+      - ./.env
+
+
+
+  web:
+    build: ./
+    command: bash -c "python manage.py migrate && gunicorn wordle_random_api.wsgi:application --bind 0.0.0.0:8000"
+    expose:
+      - 8000
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+    links:
+      - db:db
+    networks:
+      - djangonetwork
+
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - web
+      - db
+    networks:
+      - djangonetwork
+
+
+volumes:
+  postgres_data:
+
+networks:
+  djangonetwork:
+      driver: bridge
+
