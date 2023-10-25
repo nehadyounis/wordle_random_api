@@ -1,91 +1,9 @@
 from django.db.models import Q
-from django.shortcuts import render
-from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from .serializers import *
-import csv
 from django.conf import settings
+from django.http import JsonResponse
 import re
-import time
-
-
-# @api_view(['GET'])
-# def add_all_words(request):
-#     """
-#     :param request:
-#     :return: Added words
-#     Adds words to database according to CSV file
-#     """
-#     return bad_request('Cannot add words to database currently')
-#     file = open(str(settings.BASE_DIR) + "/static/" + 'words_pos.csv')
-#     csvreader = csv.reader(file)
-#     response = []
-#     for row in csvreader:
-#         word = Word()
-#         word.word = row[1].lower()
-#         word.type = row[2]
-#         try:
-#             word.save()
-#         except:
-#             pass
-#         response.append(row[0])
-#     return JsonResponse(response, safe=False)
-#
-# @api_view(['GET'])
-# def mark_unique(request):
-#     """
-#     :param request:
-#     :return: Number of words altered in a JsonResponse
-#     This function marks unique words in the database according to external CSV.
-#     """
-#     return bad_request('Cannot modify the database currently')
-#     file = open(str(settings.BASE_DIR) + "/static/" + 'common_words.csv')
-#     csvreader = csv.reader(file)
-#     response = 0
-#     for row in csvreader:
-#         try:
-#             Word.objects.filter(word=row[0]).update(is_common=True)
-#             response = response + 1
-#         except:
-#             pass
-#     return JsonResponse(response, safe=False)
-#
-# @api_view(['GET'])
-# def calc_len(request):
-#     """
-#
-#     :param request:
-#     :return: Number of words altered in a JsonResponse
-#     This function calculates len of every word in the database
-#     """
-#     return bad_request('Cannot modify the database currently')
-#     response = 0
-#     words = Word.objects.all()
-#     for word in words:
-#         word.length = len(word.word)
-#         word.save()
-#         response = response + 1
-#
-#     return JsonResponse(response, safe=False)
-
-@api_view(['GET'])
-def set_freq(request):
-    """
-    :param request:
-    :return: Number of words altered in a JsonResponse
-    This function marks unique words in the database according to external CSV.
-    """
-    # return bad_request('Cannot modify the database currently')
-    file = open(str(settings.BASE_DIR) + "/static/" + 'frequencies.csv')
-    csvreader = csv.reader(file)
-    response = 0
-    for row in csvreader:
-        try:
-            Word.objects.filter(word=row[0]).update(frequency=int(row[1]))
-            response = response + 1
-        except:
-            pass
-    return JsonResponse(response, safe=False)
 
 
 @api_view(['GET'])
@@ -254,6 +172,7 @@ def is_a_word(request, word):
         return JsonResponse(False, safe=False)
 
 
+
 def bad_request(msg):
     resp = JsonResponse({"error": msg}, safe=False)
     resp.status_code = 400
@@ -281,3 +200,4 @@ def get_ip_address(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
